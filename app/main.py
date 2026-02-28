@@ -13,7 +13,13 @@ from fastapi.staticfiles import StaticFiles
 from app.database import engine, Base
 from app.routers import debts
 from app.routers import stripe_router
+import os
+from dotenv import load_dotenv
+import stripe
 
+load_dotenv()
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -109,3 +115,18 @@ else:
 def health():
     """Health check for load balancers."""
     return {"status": "ok"}
+
+from fastapi import APIRouter
+import stripe
+import os
+
+router = APIRouter()
+
+@router.post("/create-payment-intent")
+def create_payment(amount: int):
+    intent = stripe.PaymentIntent.create(
+        amount=amount,
+        currency="usd",
+        automatic_payment_methods={"enabled": True},
+    )
+    return {"client_secret": intent.client_secret}
