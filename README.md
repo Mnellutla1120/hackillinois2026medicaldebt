@@ -14,6 +14,8 @@ A REST API for assessing medical debt risk and generating repayment plans. Built
 
 ## Quick Start
 
+### Backend (API)
+
 ```bash
 # Create virtual environment
 python -m venv venv
@@ -29,6 +31,18 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 - **API**: http://127.0.0.1:8000
 - **Swagger UI**: http://127.0.0.1:8000/docs
 - **ReDoc**: http://127.0.0.1:8000/redoc
+
+### Frontend (React)
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+- **App**: http://localhost:5173
+
+The frontend proxies `/api` to the backend. Start the backend first.
 
 ## Seed Sample Data
 
@@ -136,18 +150,27 @@ Install driver: `pip install psycopg2-binary`
 
 ```
 medical-debt-api/
-├── app/
-│   ├── main.py          # FastAPI app, error handlers
-│   ├── models.py        # SQLAlchemy models
-│   ├── schemas.py       # Pydantic schemas
-│   ├── database.py      # DB config (SQLite/PostgreSQL)
+├── app/                    # Backend (FastAPI)
+│   ├── main.py
+│   ├── models.py
+│   ├── schemas.py
+│   ├── database.py
 │   ├── services/
 │   │   └── risk_engine.py
 │   └── routers/
 │       └── debts.py
+├── frontend/               # React (Vite)
+│   ├── src/
+│   │   ├── api.js         # API client
+│   │   ├── components/
+│   │   │   ├── CreateDebtForm.jsx
+│   │   │   ├── DebtList.jsx
+│   │   │   ├── DebtCard.jsx
+│   │   │   └── DebtDetail.jsx
+│   │   └── App.jsx
+│   └── package.json
 ├── scripts/
 │   └── seed_data.py
 ├── requirements.txt
-├── .env.example
 └── README.md
 ```
