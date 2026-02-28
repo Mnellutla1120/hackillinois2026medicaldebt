@@ -14,6 +14,7 @@ export function CreateDebtForm({ onCreated }) {
   const [error, setError] = useState(null);
   const [result, setResult] = useState(null);
 
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -81,8 +82,8 @@ export function CreateDebtForm({ onCreated }) {
               value={form.income}
               onChange={handleChange}
               required
-              min="1"
-              step="1000"
+              min="0"  
+              step="any"
               placeholder="55000"
             />
           </label>
@@ -94,8 +95,8 @@ export function CreateDebtForm({ onCreated }) {
               value={form.debt_amount}
               onChange={handleChange}
               required
-              min="1"
-              step="100"
+              min="0"
+              step="any"
               placeholder="12000"
             />
           </label>
