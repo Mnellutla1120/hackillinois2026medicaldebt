@@ -1,7 +1,8 @@
 /**
  * API client for Medical Debt Risk & Repayment Planning API
  */
-const API_BASE = import.meta.env.DEV ? '/api' : (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000');
+// DEV: Vite proxy to backend. Production: same origin when served from FastAPI
+const API_BASE = import.meta.env.DEV ? '/api' : (import.meta.env.VITE_API_URL || '');
 
 async function request(path, options = {}) {
   const url = `${API_BASE}${path}`;
@@ -27,4 +28,13 @@ export const api = {
   getDebtSummary: (id) => request(`/debts/${id}/summary`),
   updateDebt: (id, data) => request(`/debts/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteDebt: (id) => request(`/debts/${id}`, { method: 'DELETE' }),
+  createCheckoutSession: (debtId, successUrl, cancelUrl) =>
+    request('/stripe/create-checkout-session', {
+      method: 'POST',
+      body: JSON.stringify({
+        debt_id: debtId,
+        success_url: successUrl,
+        cancel_url: cancelUrl,
+      }),
+    }),
 };

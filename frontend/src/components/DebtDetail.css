@@ -116,6 +116,30 @@
   margin-top: 1.5rem;
   padding-top: 1rem;
   border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.btn-pay {
+  padding: 0.6rem 1.25rem;
+  background: #635bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background 0.2s;
+}
+
+.btn-pay:hover:not(:disabled) {
+  background: #5046e5;
+}
+
+.btn-pay:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .btn-danger {

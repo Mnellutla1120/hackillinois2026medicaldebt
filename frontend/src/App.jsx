@@ -1,10 +1,20 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CreateDebtForm } from './components/CreateDebtForm';
 import { DebtList } from './components/DebtList';
 import './App.css';
 
 function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [paymentStatus, setPaymentStatus] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const status = params.get('payment');
+    if (status === 'success' || status === 'cancelled') {
+      setPaymentStatus(status);
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
 
   const handleCreated = () => {
     setRefreshTrigger((t) => t + 1);
@@ -12,6 +22,12 @@ function App() {
 
   return (
     <div className="app">
+      {paymentStatus && (
+        <div className={`payment-banner ${paymentStatus}`}>
+          {paymentStatus === 'success' ? '✓ Payment successful!' : 'Payment cancelled.'}
+          <button onClick={() => setPaymentStatus(null)}>×</button>
+        </div>
+      )}
       <header className="header">
         <h1>Medical Debt Risk & Repayment</h1>
         <p>Assess risk and plan repayments for medical debt</p>

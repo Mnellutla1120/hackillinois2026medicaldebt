@@ -7,6 +7,7 @@ export function DebtDetail({ debtId, onClose, onDeleted }) {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [paying, setPaying] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -35,6 +36,23 @@ export function DebtDetail({ debtId, onClose, onDeleted }) {
       onDeleted?.();
     } catch (err) {
       alert(err.message);
+    }
+  };
+
+  const handlePay = async () => {
+    setPaying(true);
+    try {
+      const base = window.location.origin;
+      const { url } = await api.createCheckoutSession(
+        debtId,
+        `${base}/?payment=success`,
+        `${base}/?payment=cancelled`
+      );
+      if (url) window.location.href = url;
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setPaying(false);
     }
   };
 
@@ -85,6 +103,13 @@ export function DebtDetail({ debtId, onClose, onDeleted }) {
               </div>
             </div>
             <div className="detail-actions">
+              <button
+                className="btn-pay"
+                onClick={handlePay}
+                disabled={paying || debt.recommended_monthly_payment < 0.5}
+              >
+                {paying ? 'Redirecting…' : `Pay $${debt.recommended_monthly_payment.toLocaleString()} (Stripe)`}
+              </button>
               <button className="btn-danger" onClick={handleDelete}>
                 Delete Record
               </button>

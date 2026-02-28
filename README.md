@@ -7,42 +7,37 @@ A REST API for assessing medical debt risk and generating repayment plans. Built
 | Component | Technology |
 |-----------|------------|
 | Backend | Python 3.11+, FastAPI |
+| Frontend | React 19, Vite |
+| Payments | Stripe Checkout |
 | Server | Uvicorn (ASGI) |
 | Database | SQLite (local) / PostgreSQL (optional) |
 | ORM | SQLAlchemy 2.x |
 | Validation | Pydantic v2 |
 
-## Quick Start
+## Quick Start (Combined App)
 
-### Backend (API)
+One command runs both frontend and backend:
 
 ```bash
-# Create virtual environment
+# Setup (first time)
 python -m venv venv
-source venv/bin/activate   # Windows: venv\Scripts\activate
-
-# Install dependencies
+source venv/bin/activate
 pip install -r requirements.txt
+cd frontend && npm install && cd ..
 
-# Run the API
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+# Run combined app
+./run.sh
+# Or: cd frontend && npm run build && cd .. && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-- **API**: http://127.0.0.1:8000
-- **Swagger UI**: http://127.0.0.1:8000/docs
-- **ReDoc**: http://127.0.0.1:8000/redoc
+- **App**: http://localhost:8000
+- **API docs**: http://localhost:8000/docs
 
-### Frontend (React)
+### Stripe (for payments)
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-- **App**: http://localhost:5173
-
-The frontend proxies `/api` to the backend. Start the backend first.
+1. Copy `.env.example` to `.env`
+2. Add your [Stripe test key](https://dashboard.stripe.com/test/apikeys): `STRIPE_SECRET_KEY=sk_test_...`
+3. Click "Pay" on any debt to test the checkout flow
 
 ## Seed Sample Data
 
@@ -60,6 +55,7 @@ python scripts/seed_data.py
 | GET | `/debts/{id}/summary` | Get concise summary with payoff estimate |
 | PATCH | `/debts/{id}` | Partial update (recomputes risk if financial fields change) |
 | DELETE | `/debts/{id}` | Delete debt (idempotent) |
+| POST | `/stripe/create-checkout-session` | Create Stripe Checkout session for monthly payment |
 
 ### Query Parameters for `GET /debts`
 
@@ -151,14 +147,15 @@ Install driver: `pip install psycopg2-binary`
 ```
 medical-debt-api/
 ├── app/                    # Backend (FastAPI)
-│   ├── main.py
+│   ├── main.py             # Serves React build + API
 │   ├── models.py
 │   ├── schemas.py
 │   ├── database.py
 │   ├── services/
 │   │   └── risk_engine.py
 │   └── routers/
-│       └── debts.py
+│       ├── debts.py
+│       └── stripe_router.py  # Stripe Checkout
 ├── frontend/               # React (Vite)
 │   ├── src/
 │   │   ├── api.js         # API client

@@ -1,16 +1,18 @@
 """
 Medical Debt Risk & Repayment Planning API
-FastAPI application with REST endpoints.
+FastAPI application with REST endpoints + React frontend.
 """
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from app.database import engine, Base
-from app.models import MedicalDebt
 from app.routers import debts
+from app.routers import stripe_router
 
 
 @asynccontextmanager
@@ -77,25 +79,30 @@ async def internal_error_handler(request: Request, exc: Exception):
 # --- Routes ---
 
 app.include_router(debts.router)
+app.include_router(stripe_router.router)
 
+# Serve React frontend (built from frontend/)
+_frontend_dist = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+if _frontend_dist.exists():
+    app.mount("/assets", StaticFiles(directory=_frontend_dist / "assets"), name="assets")
 
-@app.get("/", tags=["root"])
-def root():
-    """Health check and API info."""
-    return {
-        "name": "Medical Debt Risk & Repayment Planning API",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "redoc": "/redoc",
-        "endpoints": {
-            "POST /debts": "Create debt record",
-            "GET /debts": "List debts (filter by risk_level, provider, patient_name)",
-            "GET /debts/{id}": "Get debt by ID",
-            "GET /debts/{id}/summary": "Get debt summary",
-            "PATCH /debts/{id}": "Update debt",
-            "DELETE /debts/{id}": "Delete debt",
-        },
-    }
+    @app.get("/", tags=["root"])
+    def serve_app():
+        return FileResponse(_frontend_dist / "index.html")
+
+    @app.get("/{path:path}", tags=["root"])
+    def serve_spa(path: str):
+        """Serve index.html for SPA client-side routes (API routes take precedence)."""
+        return FileResponse(_frontend_dist / "index.html")
+else:
+    @app.get("/", tags=["root"])
+    def root():
+        return {
+            "name": "Medical Debt Risk & Repayment Planning API",
+            "version": "1.0.0",
+            "docs": "/docs",
+            "message": "Run 'cd frontend && npm run build' to serve the React app",
+        }
 
 
 @app.get("/health", tags=["root"])

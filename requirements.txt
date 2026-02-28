@@ -7,6 +7,9 @@ sqlalchemy>=2.0.25
 pydantic>=2.5.0
 pydantic-settings>=2.1.0
 
+# Stripe
+stripe>=8.0.0
+
 # Database drivers
 # SQLite: built-in
 # PostgreSQL (optional): uncomment when deploying
