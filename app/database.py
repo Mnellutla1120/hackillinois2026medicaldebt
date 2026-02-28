@@ -19,7 +19,10 @@ class Settings(BaseSettings):
 settings = Settings()
 
 # Use DATABASE_URL from env for PostgreSQL, otherwise SQLite
+#database_url = os.getenv("DATABASE_URL", settings.database_url)
 database_url = os.getenv("DATABASE_URL", settings.database_url)
+if database_url.startswith("postgresql://"):
+    database_url = database_url.replace("postgresql://", "postgresql+psycopg2://", 1)
 
 # SQLite needs special config for async-like behavior (check_same_thread=False)
 connect_args = {}
