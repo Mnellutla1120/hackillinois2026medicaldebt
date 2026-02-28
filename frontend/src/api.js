@@ -12,7 +12,10 @@ async function request(path, options = {}) {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    const msg = Array.isArray(err.detail)
+      ? err.detail.map((e) => e.msg || JSON.stringify(e)).join('. ')
+      : (typeof err.detail === 'string' ? err.detail : JSON.stringify(err.detail));
+    throw new Error(msg || `HTTP ${res.status}`);
   }
   if (res.status === 204) return null;
   return res.json();
