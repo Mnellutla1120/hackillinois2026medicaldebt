@@ -10,7 +10,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Application settings with environment variable support."""
     database_url: str = "sqlite:///./medical_debt.db"
-    
+    stripe_secret_key: str
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"
