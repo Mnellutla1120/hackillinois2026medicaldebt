@@ -7,10 +7,9 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 from pydantic_settings import BaseSettings
 
 # HARDCODED for Vercel deployment
-database_url = "postgresql+psycopg2://neondb_owner:npg_NaW3DJQvP5Ge@ep-proud-dust-aigbi3mu-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require"
+database_url = "postgresql+pg8000://neondb_owner:npg_NaW3DJQvP5Ge@ep-proud-dust-aigbi3mu-pooler.c-4.us-east-1.aws.neon.tech/neondb?sslmode=require"
 
-# Fix postgresql:// to postgresql+psycopg2://
-
+# Fix postgresql:// to postgresql
 connect_args = {}
 
 engine = create_engine(database_url, connect_args=connect_args, echo=False)
