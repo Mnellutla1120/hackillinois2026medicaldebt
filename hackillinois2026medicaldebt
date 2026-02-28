@@ -21,7 +21,6 @@ def get_db():
     finally:
         db.close()
 
-
 # -----------------------------
 # Load insurance.csv into DB
 # -----------------------------
