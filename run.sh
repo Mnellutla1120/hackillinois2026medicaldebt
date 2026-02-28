@@ -1,4 +1,4 @@
-#!/bin/bash
+cd frontendcd frontend#!/bin/bash
 # Build frontend and run combined app
 set -e
 cd "$(dirname "$0")"
