@@ -38,6 +38,9 @@ def seed():
                 debt_amount=data["debt_amount"],
                 income=data["income"],
                 credit_score=data["credit_score"],
+                repayment_months=data.get("repayment_months", 24),
+                interest_rate=data.get("interest_rate", 0),
+                down_payment=data.get("down_payment", 0),
             )
             record = MedicalDebt(
                 patient_name=data["patient_name"],
@@ -45,9 +48,13 @@ def seed():
                 debt_amount=data["debt_amount"],
                 credit_score=data["credit_score"],
                 provider=data["provider"],
+                interest_rate=data.get("interest_rate", 0),
+                down_payment=data.get("down_payment", 0),
+                repayment_months=data.get("repayment_months", 24),
                 risk_score=result.risk_score,
                 risk_level=result.risk_level,
                 recommended_monthly_payment=result.recommended_monthly_payment,
+                total_interest=result.total_interest,
             )
             db.add(record)
         db.commit()

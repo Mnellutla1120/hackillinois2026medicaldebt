@@ -28,13 +28,15 @@ export const api = {
   getDebtSummary: (id) => request(`/debts/${id}/summary`),
   updateDebt: (id, data) => request(`/debts/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteDebt: (id) => request(`/debts/${id}`, { method: 'DELETE' }),
-  createCheckoutSession: (debtId, successUrl, cancelUrl) =>
+  createCheckoutSession: (debtId, successUrl, cancelUrl, amount, paymentType) =>
     request('/stripe/create-checkout-session', {
       method: 'POST',
       body: JSON.stringify({
         debt_id: debtId,
         success_url: successUrl,
         cancel_url: cancelUrl,
+        ...(amount != null && { amount: Number(amount) }),
+        ...(paymentType && { payment_type: paymentType }),
       }),
     }),
 };

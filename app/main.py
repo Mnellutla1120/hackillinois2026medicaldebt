@@ -23,8 +23,10 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Create tables on startup."""
+    """Create tables on startup; migrate existing DBs for new columns."""
     Base.metadata.create_all(bind=engine)
+    from app.database import migrate_sqlite_add_repayment_columns
+    migrate_sqlite_add_repayment_columns()
     yield
     # Shutdown cleanup if needed
 

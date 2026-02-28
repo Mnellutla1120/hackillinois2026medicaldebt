@@ -32,6 +32,9 @@ def create_debt(debt: DebtCreate, db: Session = Depends(get_db)):
         debt_amount=debt.debt_amount,
         income=debt.income,
         credit_score=debt.credit_score,
+        repayment_months=debt.repayment_months,
+        interest_rate=debt.interest_rate,
+        down_payment=debt.down_payment,
     )
     record = MedicalDebt(
         patient_name=debt.patient_name,
@@ -39,14 +42,26 @@ def create_debt(debt: DebtCreate, db: Session = Depends(get_db)):
         debt_amount=debt.debt_amount,
         credit_score=debt.credit_score,
         provider=debt.provider,
+        interest_rate=debt.interest_rate,
+        down_payment=debt.down_payment,
+        repayment_months=debt.repayment_months,
         risk_score=result.risk_score,
         risk_level=result.risk_level,
         recommended_monthly_payment=result.recommended_monthly_payment,
+        total_interest=result.total_interest,
     )
     db.add(record)
     db.commit()
     db.refresh(record)
-    return record
+    return DebtCreateResponse(
+        id=record.id,
+        risk_score=record.risk_score,
+        risk_level=record.risk_level,
+        recommended_monthly_payment=record.recommended_monthly_payment,
+        total_interest=record.total_interest,
+        amount_after_down_payment=result.amount_after_down_payment,
+        estimated_payoff_months=result.estimated_payoff_months,
+    )
 
 
 @router.get(
@@ -106,16 +121,30 @@ def update_debt(debt_id: int, payload: DebtUpdate, db: Session = Depends(get_db)
     
     update_data = payload.model_dump(exclude_unset=True)
     
-    # Recompute risk if income, debt_amount, or credit_score changed
-    needs_recompute = any(k in update_data for k in ("income", "debt_amount", "credit_score"))
+    # Recompute risk/repayment if any financial or plan fields changed
+    recompute_keys = ("income", "debt_amount", "credit_score", "interest_rate", "down_payment", "repayment_months")
+    needs_recompute = any(k in update_data for k in recompute_keys)
     if needs_recompute:
         income = update_data.get("income", record.income)
         debt_amount = update_data.get("debt_amount", record.debt_amount)
         credit_score = update_data.get("credit_score", record.credit_score)
-        result = calculate_risk(debt_amount=debt_amount, income=income, credit_score=credit_score)
+        interest_rate = update_data.get("interest_rate", record.interest_rate)
+        down_payment = update_data.get("down_payment", record.down_payment)
+        repayment_months = update_data.get("repayment_months", record.repayment_months)
+        if down_payment >= debt_amount:
+            raise HTTPException(status_code=400, detail="Down payment must be less than debt amount")
+        result = calculate_risk(
+            debt_amount=debt_amount,
+            income=income,
+            credit_score=credit_score,
+            repayment_months=repayment_months,
+            interest_rate=interest_rate,
+            down_payment=down_payment,
+        )
         update_data["risk_score"] = result.risk_score
         update_data["risk_level"] = result.risk_level
         update_data["recommended_monthly_payment"] = result.recommended_monthly_payment
+        update_data["total_interest"] = result.total_interest
     
     for key, value in update_data.items():
         setattr(record, key, value)
@@ -151,15 +180,21 @@ def get_debt_summary(debt_id: int, db: Session = Depends(get_db)):
     record = db.query(MedicalDebt).filter(MedicalDebt.id == debt_id).first()
     if not record:
         raise HTTPException(status_code=404, detail="Debt not found")
-    
-    months = max(1, int(record.debt_amount / record.recommended_monthly_payment))
-    
+
+    amount_remaining = max(0.0, record.debt_amount - record.down_payment)
+    estimated_months = record.repayment_months
+    if record.recommended_monthly_payment > 0 and amount_remaining > 0:
+        estimated_months = max(1, int(round(amount_remaining / record.recommended_monthly_payment)))
+
     return DebtSummary(
         id=record.id,
         patient_name=record.patient_name,
         provider=record.provider,
         debt_amount=record.debt_amount,
+        down_payment=record.down_payment,
+        amount_remaining=amount_remaining,
         risk_level=record.risk_level,
         recommended_monthly_payment=record.recommended_monthly_payment,
-        estimated_payoff_months=months,
+        total_interest=getattr(record, "total_interest", 0) or 0,
+        estimated_payoff_months=estimated_months,
     )

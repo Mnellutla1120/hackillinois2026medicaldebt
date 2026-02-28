@@ -39,14 +39,16 @@ export function DebtDetail({ debtId, onClose, onDeleted }) {
     }
   };
 
-  const handlePay = async () => {
+  const handlePay = async (amount, paymentType) => {
     setPaying(true);
     try {
       const base = window.location.origin;
       const { url } = await api.createCheckoutSession(
         debtId,
         `${base}/?payment=success`,
-        `${base}/?payment=cancelled`
+        `${base}/?payment=cancelled`,
+        amount,
+        paymentType
       );
       if (url) window.location.href = url;
     } catch (err) {
@@ -94,6 +96,18 @@ export function DebtDetail({ debtId, onClose, onDeleted }) {
                 <span className="label">Risk Score</span>
                 <span className="value">{debt.risk_score}</span>
               </div>
+              {(debt.interest_rate ?? 0) > 0 && (
+                <div className="detail-item">
+                  <span className="label">Interest rate / Total interest</span>
+                  <span className="value">{(debt.interest_rate * 100).toFixed(1)}% / ${(debt.total_interest ?? summary.total_interest ?? 0).toLocaleString()}</span>
+                </div>
+              )}
+              {(debt.down_payment ?? 0) > 0 && (
+                <div className="detail-item">
+                  <span className="label">Down payment / Amount remaining</span>
+                  <span className="value">${(debt.down_payment ?? 0).toLocaleString()} / ${(summary.amount_remaining ?? debt.debt_amount).toLocaleString()}</span>
+                </div>
+              )}
               <div className="detail-item highlight">
                 <span className="label">Recommended Monthly Payment</span>
                 <span className="value">${debt.recommended_monthly_payment.toLocaleString()}</span>
@@ -104,12 +118,21 @@ export function DebtDetail({ debtId, onClose, onDeleted }) {
               </div>
             </div>
             <div className="detail-actions">
+              {(debt.down_payment ?? 0) > 0 && (
+                <button
+                  className="btn-pay btn-pay-down"
+                  onClick={() => handlePay(debt.down_payment, 'down_payment')}
+                  disabled={paying || debt.down_payment < 0.5}
+                >
+                  {paying ? '…' : `Pay down $${(debt.down_payment ?? 0).toLocaleString()}`}
+                </button>
+              )}
               <button
                 className="btn-pay"
-                onClick={handlePay}
+                onClick={() => handlePay(null, 'monthly')}
                 disabled={paying || debt.recommended_monthly_payment < 0.5}
               >
-                {paying ? 'Redirecting…' : `Pay $${debt.recommended_monthly_payment.toLocaleString()} (Stripe)`}
+                {paying ? 'Redirecting…' : `Pay $${debt.recommended_monthly_payment.toLocaleString()} (monthly)`}
               </button>
               <button className="btn-danger" onClick={handleDelete}>
                 Delete Record

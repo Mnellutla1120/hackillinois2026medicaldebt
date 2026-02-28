@@ -34,4 +34,35 @@ engine = create_engine(
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative
+Base = declarative_base()
+
+
+def get_db():
+    """Dependency for FastAPI - yields database session."""
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def migrate_sqlite_add_repayment_columns():
+    """Add new repayment columns to existing SQLite DB if missing."""
+    if not database_url.startswith("sqlite"):
+        return
+    from sqlalchemy import text, inspect
+    insp = inspect(engine)
+    if "medical_debts" not in insp.get_table_names():
+        return
+    cols = [c["name"] for c in insp.get_columns("medical_debts")]
+    for col, typ, default in [
+        ("interest_rate", "FLOAT", "0"),
+        ("down_payment", "FLOAT", "0"),
+        ("repayment_months", "INTEGER", "24"),
+        ("total_interest", "FLOAT", "0"),
+    ]:
+        if col in cols:
+            continue
+        with engine.connect() as conn:
+            conn.execute(text(f"ALTER TABLE medical_debts ADD COLUMN {col} {typ} DEFAULT {default}"))
+            conn.commit()
