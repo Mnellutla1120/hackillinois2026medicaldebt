@@ -16,7 +16,7 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
 
-
+DATABASE_URL = os.getenv("DATABASE_URL")
 settings = Settings()
 
 # Use DATABASE_URL or POSTGRES_URL. On Vercel, SQLite won't work — use Postgres or /tmp (ephemeral).
