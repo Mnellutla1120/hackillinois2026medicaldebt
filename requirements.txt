@@ -1,18 +1,10 @@
-# Medical Debt Risk & Repayment Planning API
-# Python 3.11+
-
 fastapi>=0.109.0
-uvicorn[standard]>=0.27.0
+uvicorn>=0.27.0
 sqlalchemy>=2.0.25
 pydantic>=2.5.0
 pydantic-settings>=2.1.0
 
-# Stripe
 stripe>=8.0.0
 python-dotenv>=1.0.0
 
-# Database drivers
-# SQLite: built-in
-# PostgreSQL (optional): uncomment when deploying
 psycopg2>=2.9.9
-
