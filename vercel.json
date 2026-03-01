@@ -1,10 +1,13 @@
 {
-  "buildCommand": "cd frontend && npm ci && npm run build",
-  "outputDirectory": "frontend/dist",
-  "env": {
-    "VITE_API_URL": "/api"
-  },
+  "version": 2,
   "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    },
     {
       "src": "api/index.py",
       "use": "@vercel/python",
@@ -21,6 +24,13 @@
     {
       "src": "/api",
       "dest": "api/index.py"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "frontend/$1"
     }
-  ]
+  ],
+  "env": {
+    "VITE_API_URL": "/api"
+  }
 }

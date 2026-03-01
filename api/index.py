@@ -1,7 +1,9 @@
 """
 Vercel serverless entry — API only. Frontend is served as static.
 """
+import sys
 import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
