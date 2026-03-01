@@ -129,7 +129,7 @@ export function CreateDebtForm({ onCreated }) {
               value={form.interest_rate}
               onChange={handleChange}
               min="0"
-              max="0.5"
+              max="1.0"
               step="0.01"
               placeholder="0"
             />
@@ -142,7 +142,7 @@ export function CreateDebtForm({ onCreated }) {
               value={form.down_payment}
               onChange={handleChange}
               min="0"
-              step="100"
+              step="1"
               placeholder="0"
             />
           </label>
