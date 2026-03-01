@@ -1,5 +1,5 @@
 /**
- * API client for Medical Debt Risk & Repayment Planning API
+ * API client for MediPay
  */
 // DEV: Vite proxy to backend. Production: same origin when served from FastAPI
 const API_BASE = import.meta.env.DEV ? '/api' : (import.meta.env.VITE_API_URL || '');
@@ -12,7 +12,10 @@ async function request(path, options = {}) {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));
-    throw new Error(err.detail || `HTTP ${res.status}`);
+    const msg = Array.isArray(err.detail)
+      ? err.detail.map((e) => e.msg || JSON.stringify(e)).join('. ')
+      : (typeof err.detail === 'string' ? err.detail : JSON.stringify(err.detail));
+    throw new Error(msg || `HTTP ${res.status}`);
   }
   if (res.status === 204) return null;
   return res.json();
@@ -28,13 +31,15 @@ export const api = {
   getDebtSummary: (id) => request(`/debts/${id}/summary`),
   updateDebt: (id, data) => request(`/debts/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteDebt: (id) => request(`/debts/${id}`, { method: 'DELETE' }),
-  createCheckoutSession: (debtId, successUrl, cancelUrl) =>
+  createCheckoutSession: (debtId, successUrl, cancelUrl, amount, paymentType) =>
     request('/stripe/create-checkout-session', {
       method: 'POST',
       body: JSON.stringify({
         debt_id: debtId,
         success_url: successUrl,
         cancel_url: cancelUrl,
+        ...(amount != null && { amount: Number(amount) }),
+        ...(paymentType && { payment_type: paymentType }),
       }),
     }),
 };

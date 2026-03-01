@@ -29,8 +29,8 @@ function App() {
         </div>
       )}
       <header className="header">
-        <h1>Medical Debt Risk & Repayment</h1>
-        <p>Assess risk and plan repayments for medical debt</p>
+        <h1>MediPay</h1>
+        <p>Assess financial risk and plan repayment for medical debt.</p>
       </header>
       <main className="main">
         <CreateDebtForm onCreated={handleCreated} />

@@ -1,6 +1,5 @@
 """
-Medical Debt Risk & Repayment Planning API
-FastAPI application with REST endpoints + React frontend.
+MediPay — FastAPI application with REST endpoints + React frontend.
 """
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -23,14 +22,16 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Create tables on startup."""
+    """Create tables on startup; migrate existing DBs for new columns."""
     Base.metadata.create_all(bind=engine)
+    from app.database import migrate_sqlite_add_repayment_columns
+    migrate_sqlite_add_repayment_columns()
     yield
     # Shutdown cleanup if needed
 
 
 app = FastAPI(
-    title="Medical Debt Risk & Repayment Planning API",
+    title="MediPay",
     description="""
     A REST API for assessing medical debt risk and generating repayment plans.
     
@@ -104,7 +105,7 @@ else:
     @app.get("/", tags=["root"])
     def root():
         return {
-            "name": "Medical Debt Risk & Repayment Planning API",
+            "name": "MediPay",
             "version": "1.0.0",
             "docs": "/docs",
             "message": "Run 'cd frontend && npm run build' to serve the React app",

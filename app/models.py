@@ -18,11 +18,16 @@ class MedicalDebt(Base):
     debt_amount = Column(Float, nullable=False)
     credit_score = Column(Integer, nullable=False)
     provider = Column(String(255), nullable=False, index=True)
-    
+    # Repayment options (optional)
+    interest_rate = Column(Float, default=0.0, nullable=False)  # e.g. 0.05 = 5% annual
+    down_payment = Column(Float, default=0.0, nullable=False)
+    repayment_months = Column(Integer, default=24, nullable=False)
+
     # Computed fields (stored for querying/filtering)
     risk_score = Column(Float, nullable=False)
     risk_level = Column(String(50), nullable=False, index=True)
     recommended_monthly_payment = Column(Float, nullable=False)
+    total_interest = Column(Float, default=0.0, nullable=False)  # total interest over life of plan
     
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)

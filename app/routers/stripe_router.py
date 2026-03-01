@@ -21,6 +21,10 @@ class CreateCheckoutRequest(BaseModel):
     debt_id: int
     success_url: str | None = None
     cancel_url: str | None = None
+    # Optional: pay a specific amount (e.g. down payment, custom one-off). In USD.
+    amount: float | None = None
+    # Optional: label for the line item
+    payment_type: str | None = None  # e.g. "down_payment", "monthly", "custom"
 
 
 @router.post("/create-checkout-session")
@@ -29,7 +33,8 @@ def create_checkout_session(
     db: Session = Depends(get_db),
 ):
     """
-    Create a Stripe Checkout session for a debt's recommended monthly payment.
+    Create a Stripe Checkout session for a debt payment.
+    Uses recommended_monthly_payment by default, or pass amount for down payment / custom payment.
     Returns a URL to redirect the user to Stripe's hosted payment page.
     """
     if not stripe.api_key:
@@ -42,7 +47,14 @@ def create_checkout_session(
     if not record:
         raise HTTPException(status_code=404, detail="Debt not found")
 
-    amount_cents = int(record.recommended_monthly_payment * 100)
+    if payload.amount is not None:
+        amount_usd = payload.amount
+        label = (payload.payment_type or "custom").replace("_", " ").title()
+    else:
+        amount_usd = record.recommended_monthly_payment
+        label = "monthly"
+
+    amount_cents = int(round(amount_usd * 100))
     if amount_cents < 50:  # Stripe minimum
         raise HTTPException(
             status_code=400,
@@ -57,8 +69,8 @@ def create_checkout_session(
                     "price_data": {
                         "currency": "usd",
                         "product_data": {
-                            "name": f"Medical debt payment - {record.provider}",
-                            "description": f"Monthly payment for {record.patient_name}",
+                            "name": f"Medical debt - {record.provider} ({label})",
+                            "description": f"Payment for {record.patient_name}",
                             "images": [],
                         },
                         "unit_amount": amount_cents,
