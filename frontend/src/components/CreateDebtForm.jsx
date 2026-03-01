@@ -142,7 +142,7 @@ export function CreateDebtForm({ onCreated }) {
               value={form.down_payment}
               onChange={handleChange}
               min="0"
-              step="1"
+              step="any"
               placeholder="0"
             />
           </label>
