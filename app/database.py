@@ -19,8 +19,11 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-# Use DATABASE_URL from env for PostgreSQL, otherwise SQLite
+# Use DATABASE_URL from env for PostgreSQL. On Vercel, SQLite won't work — set DATABASE_URL (e.g. Vercel Postgres).
 database_url = os.getenv("DATABASE_URL", settings.database_url)
+if os.getenv("VERCEL") and not database_url.startswith("postgres"):
+    # Vercel: require Postgres; SQLite filesystem is read-only
+    database_url = os.getenv("POSTGRES_URL") or database_url
 
 # SQLite needs special config for async-like behavior (check_same_thread=False)
 connect_args = {}

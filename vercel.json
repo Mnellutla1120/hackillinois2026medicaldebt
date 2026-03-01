@@ -1,13 +1,19 @@
 {
+  "buildCommand": "cd frontend && npm ci && npm run build",
+  "devCommand": "cd frontend && npm run dev",
   "builds": [
     {
-      "src": "app/main.py",
+      "src": "api/index.py",
       "use": "@vercel/python",
       "config": {
-        "includeFiles": ["app/**"],
-        "maxLambdaSize": "15mb"
+        "includeFiles": "app/**"
       }
     }
   ],
-  "routes": [{"src": "/(.*)", "dest": "app/main.py"}]
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/index.py"
+    }
+  ]
 }

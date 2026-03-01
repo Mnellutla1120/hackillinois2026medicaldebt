@@ -53,10 +53,11 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# CORS for React frontend
+# CORS — allow localhost (dev) and Vercel deployments
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:8000"],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -116,18 +117,3 @@ else:
 def health():
     """Health check for load balancers."""
     return {"status": "ok"}
-
-from fastapi import APIRouter
-import stripe
-import os
-
-router = APIRouter()
-
-@router.post("/create-payment-intent")
-def create_payment(amount: int):
-    intent = stripe.PaymentIntent.create(
-        amount=amount,
-        currency="usd",
-        automatic_payment_methods={"enabled": True},
-    )
-    return {"client_secret": intent.client_secret}

@@ -72,6 +72,22 @@ Get test keys at [Stripe Dashboard → API Keys](https://dashboard.stripe.com/te
 python scripts/seed_data.py
 ```
 
+### Deploy to Vercel
+
+1. **Add a database** — Vercel can't use SQLite. Use [Vercel Postgres](https://vercel.com/storage/postgres) or any PostgreSQL provider (Neon, Supabase). Add the connection string as `DATABASE_URL` in Vercel project settings.
+
+2. **Deploy**:
+   ```bash
+   vercel
+   ```
+   Or connect your Git repo in the [Vercel dashboard](https://vercel.com/new).
+
+3. **Environment variables** (in Vercel project settings):
+   - `DATABASE_URL` — PostgreSQL connection string (required)
+   - `STRIPE_SECRET_KEY` — Stripe secret key (for payments)
+
+4. **Build** — The project builds the frontend and deploys the FastAPI app. All routes (API + frontend) are served from one deployment.
+
 ---
 
 ## 4. Using the API without the frontend
