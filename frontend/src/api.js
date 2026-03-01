@@ -1,7 +1,7 @@
 /**
  * API client for MediPay
  */
-// DEV: Vite proxy to backend. Production: same origin when served from FastAPI
+// DEV: Vite proxy. Production: VITE_API_URL or '' (same-origin). Set VITE_API_URL=/api for Vercel.
 const API_BASE = import.meta.env.DEV ? '/api' : (import.meta.env.VITE_API_URL || '');
 
 async function request(path, options = {}) {

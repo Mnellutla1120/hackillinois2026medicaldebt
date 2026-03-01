@@ -1,18 +1,25 @@
 {
   "buildCommand": "cd frontend && npm ci && npm run build",
-  "devCommand": "cd frontend && npm run dev",
+  "outputDirectory": "frontend/dist",
+  "env": {
+    "VITE_API_URL": "/api"
+  },
   "builds": [
     {
       "src": "api/index.py",
       "use": "@vercel/python",
       "config": {
-        "includeFiles": "app/**"
+        "maxLambdaSize": "50mb"
       }
     }
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/api/(.*)",
+      "dest": "api/index.py"
+    },
+    {
+      "src": "/api",
       "dest": "api/index.py"
     }
   ]

@@ -1,8 +1,31 @@
-# Medical Debt Risk & Repayment Planning API (MediPay)
+# MediPay — Medical Debt Risk & Repayment API
 
 REST API for assessing medical debt risk, generating repayment plans with **interest** and **down payments**, and processing payments via Stripe. Usable **without the frontend** via cURL, Postman, or any HTTP client.
 
-**Built for HackIllinois 2026.**
+**Built for HackIllinois 2026 — Best Web API Track**
+
+---
+
+## HackIllinois 2026 Compliance
+
+| Requirement | Status |
+|-------------|--------|
+| API with one or more endpoints | ✅ 9 endpoints (GET, POST, PATCH, DELETE) |
+| Queryable over HTTP | ✅ All endpoints return JSON |
+| Usable with cURL/Postman | ✅ No auth required; examples below |
+| Operational on localhost | ✅ `http://localhost:8000` |
+| Documentation in README | ✅ Endpoints, examples, errors |
+| Hosted documentation page | ✅ Swagger UI at `/docs`, ReDoc at `/redoc` |
+| HTTP 200/2xx for valid inputs | ✅ 200, 201, 204 |
+| Error handling with status codes | ✅ 400, 404, 422, 500, 503 |
+| Methods beyond GET | ✅ POST, PATCH, DELETE |
+| Stateful behavior | ✅ Create/update debts, Stripe payments |
+| Pagination & filtering | ✅ `limit`, `offset`, `risk_level`, `provider`, `patient_name` |
+| POST with corresponding GET | ✅ POST `/debts` → GET `/debts/{id}` |
+| List endpoint | ✅ GET `/debts` |
+| Search by criteria | ✅ By provider, patient name, risk level |
+| Idempotency (modifying ops) | ✅ DELETE returns 204 even if already deleted |
+| Public accessibility (bonus) | Deploy to Vercel for public URL (see Deploy section) |
 
 ---
 
@@ -53,8 +76,8 @@ Or use the combined script:
 ```
 
 - **Base URL (local)**: `http://localhost:8000`
-- **Interactive API docs (Swagger)**: `http://localhost:8000/docs`
-- **ReDoc**: `http://localhost:8000/redoc`
+- **Interactive docs (Swagger UI)**: `http://localhost:8000/docs` — try endpoints in-browser
+- **ReDoc**: `http://localhost:8000/redoc` — alternative documentation
 
 ### Stripe
 
@@ -86,16 +109,17 @@ python scripts/seed_data.py
    - `DATABASE_URL` — PostgreSQL connection string (required)
    - `STRIPE_SECRET_KEY` — Stripe secret key (for payments)
 
-4. **Build** — The project builds the frontend and deploys the FastAPI app. All routes (API + frontend) are served from one deployment.
+4. **Build** — The project builds the frontend and deploys the API. Once live, docs are at `https://your-app.vercel.app/api/docs`.
 
 ---
 
 ## 4. Using the API without the frontend
 
-The API is designed to be **fully usable with cURL or Postman**. No browser or frontend required.
+The API is **fully usable with cURL or Postman**. No browser or frontend required.
 
 - **Content-Type**: `application/json` for request bodies.
-- **No auth**: No JWT or cookies required for these endpoints.
+- **No auth**: No JWT or cookies required.
+- **Postman**: Import the OpenAPI spec from `http://localhost:8000/openapi.json` (File → Import → Link).
 
 ---
 
@@ -308,9 +332,13 @@ Redirect the user to `url` to complete payment.
 
 ---
 
-## 7. Error responses
+## 7. Error responses & troubleshooting
 
-All errors return JSON with a `detail` field.
+All errors return JSON with a `detail` field. If something goes wrong:
+
+- **422**: Check the `detail` array for field-level validation messages (e.g. `income` must be > 0).
+- **404**: The resource (e.g. debt ID) does not exist.
+- **400**: Business rule violated (e.g. down payment ≥ debt amount).
 
 | Status | Meaning | Example `detail` |
 |--------|---------|------------------|
@@ -401,13 +429,31 @@ pip install psycopg2-binary
 
 ---
 
-## 11. Checklist for judges
+## 11. Quick test (Postman/cURL)
 
-- At least one HTTP endpoint: **Yes** (multiple GET/POST/PATCH/DELETE).
-- Queryable over HTTP: **Yes** (JSON, no browser required).
-- Works on localhost: **Yes** (`http://localhost:8000`).
-- Testable with Postman/cURL: **Yes** (examples above).
-- README with base URL, endpoints, sample request/response, errors: **Yes** (this file).
-- Proper status codes: **Yes** (200, 201, 204, 400, 404, 422, 500, 503).
-- Stateful / POST: **Yes** (create/update debts, Stripe sessions).
-- OpenAPI/Swagger: **Yes** at `/docs`.
+```bash
+# 1. Create a debt
+curl -X POST "http://localhost:8000/debts" \
+  -H "Content-Type: application/json" \
+  -d '{"patient_name":"Test","income":50000,"debt_amount":5000,"credit_score":700,"provider":"Test Hospital"}'
+
+# 2. List debts
+curl "http://localhost:8000/debts"
+
+# 3. Get one debt (use id from step 1)
+curl "http://localhost:8000/debts/1"
+```
+
+---
+
+## 12. Tech stack (for judges)
+
+| Layer | Technology |
+|-------|------------|
+| Framework | FastAPI (Python 3.11+) |
+| Server | Uvicorn (ASGI) |
+| Database | SQLite (local) / PostgreSQL (production) |
+| ORM | SQLAlchemy 2.x |
+| Validation | Pydantic v2 |
+| Payments | Stripe Checkout |
+| Docs | OpenAPI 3.0 (auto-generated at `/docs`) |
