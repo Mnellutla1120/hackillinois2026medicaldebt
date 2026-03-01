@@ -1,6 +1,5 @@
 """
-Medical Debt Risk & Repayment Planning API
-FastAPI application with REST endpoints + React frontend.
+MediPay — FastAPI application with REST endpoints + React frontend.
 """
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -32,7 +31,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="Medical Debt Risk & Repayment Planning API",
+    title="MediPay",
     description="""
     A REST API for assessing medical debt risk and generating repayment plans.
     
@@ -106,7 +105,7 @@ else:
     @app.get("/", tags=["root"])
     def root():
         return {
-            "name": "Medical Debt Risk & Repayment Planning API",
+            "name": "MediPay",
             "version": "1.0.0",
             "docs": "/docs",
             "message": "Run 'cd frontend && npm run build' to serve the React app",

@@ -1,5 +1,5 @@
 /**
- * API client for Medical Debt Risk & Repayment Planning API
+ * API client for MediPay
  */
 // DEV: Vite proxy to backend. Production: same origin when served from FastAPI
 const API_BASE = import.meta.env.DEV ? '/api' : (import.meta.env.VITE_API_URL || '');

@@ -1,1 +1,1 @@
-# Medical Debt Risk & Repayment Planning API
+# MediPay
