@@ -13,4 +13,5 @@ stripe>=8.0.0
 # Database drivers
 # SQLite: built-in
 # PostgreSQL (optional): uncomment when deploying
-psycopg2-binary>=2.9.9
+psycopg2>=2.9.9
+
